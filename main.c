@@ -6,7 +6,12 @@
 #include <signal.h>
 #include <sys/stat.h>
 
-int main(){
+#include"execute.h"
 
-	return 0;
+int main(){
+  printf("> ");
+  char input[256];
+  fgets(input,256,stdin);
+  runchild(input);
+  return 0;
 }
