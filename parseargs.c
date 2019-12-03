@@ -7,7 +7,8 @@ char **parseargs(char *cmd){
   char **out = malloc(size * sizeof(char *));
   int i = 0;
   while(cmd){
-    out[i++] = strsep(&cmd," ");
+    char *newtok = strsep(&cmd," \t\n");
+    if(*newtok) out[i++] = newtok;
     if(i >= size){
       size *= 2;
       out = realloc(out,size * sizeof(char *));
