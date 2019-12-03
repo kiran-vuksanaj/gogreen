@@ -3,7 +3,7 @@ ifeq ($DEBUG,true)
 endif
 
 all: main.o temp.o parseargs.o execute.o
-	gcc $(CFLAGS) -o shash main.o temp.o
+	gcc $(CFLAGS) -o shash main.o temp.o parseargs.o execute.o
 main.o: main.c temp.h parseargs.h execute.h
 	gcc $(CFLAGS) -c main.c
 temp.o: temp.c temp.h
