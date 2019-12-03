@@ -9,9 +9,11 @@
 #include"execute.h"
 
 int main(){
-  printf("> ");
-  char input[256];
-  fgets(input,256,stdin);
-  runchild(input);
+  while(1){
+    printf("> ");
+    char input[256];
+    fgets(input,256,stdin);
+    runchild(input);
+  }
   return 0;
 }
