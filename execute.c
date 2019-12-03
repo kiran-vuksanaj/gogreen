@@ -4,7 +4,7 @@
 #include<errno.h>
 
 #include<unistd.h>
-
+#include<sys/wait.h>
 #include"parseargs.h"
 
 void runchild(char *prompt){
