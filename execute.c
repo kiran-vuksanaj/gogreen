@@ -8,13 +8,14 @@
 #include"parseargs.h"
 
 void runchild(char *prompt){
+  char **args = parseargs(prompt);
   int f = fork();
   if(f){
     int status;
     wait(&status);
+    free(args);
     printf("Child exited: signal %d, status %d\n",WEXITSTATUS(status),WTERMSIG(status));
   }else{
-    char **args = parseargs(prompt);
     execvp(args[0],args);
   }
 }
