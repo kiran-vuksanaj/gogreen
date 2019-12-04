@@ -1,6 +1,7 @@
 #ifndef DEFINE_EXECUTE_H
 #define DEFINE_EXECUTE_H
 
-void runchild(char *prompt);
+void exec_cmd(char *cmd);
+void runchild(char **args);
 
 #endif

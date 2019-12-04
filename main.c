@@ -13,7 +13,7 @@ int main(){
     printf("> ");
     char input[256];
     fgets(input,256,stdin);
-    runchild(input);
+    exec_cmd(input);
   }
   return 0;
 }

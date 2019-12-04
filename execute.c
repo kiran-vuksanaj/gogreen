@@ -6,14 +6,34 @@
 #include<unistd.h>
 #include<sys/wait.h>
 #include"parseargs.h"
+#include"execute.h"
 
-void runchild(char *prompt){
-  char **args = parseargs(prompt);
+void printerr(){
+  printf("errno [%d]: %s\n",errno,strerror(errno));
+}
+
+void exec_cmd(char *cmd){
+  char **args = parseargs(cmd);
+  if(!strcmp(args[0],"cd")){
+    if( chdir(args[1]) < 0 ){
+      printerr();
+    }
+    free(args);
+  }else if(!strcmp(args[0],"exit")){
+    printf("logout\n");
+    free(args);
+    exit(0);
+  }else{
+    runchild(args);
+    free(args);
+  }
+}
+
+void runchild(char **args){
   int f = fork();
   if(f){
     int status;
     wait(&status);
-    free(args);
     printf("Child exited: signal %d, status %d\n",WEXITSTATUS(status),WTERMSIG(status));
   }else{
     execvp(args[0],args);
