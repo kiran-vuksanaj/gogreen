@@ -7,10 +7,11 @@
 #include <sys/stat.h>
 
 #include"execute.h"
+#include"prompt.h"
 
 int main(){
   while(1){
-    printf("> ");
+    print_prompt();
     char input[256];
     fgets(input,256,stdin);
     exec_cmd(input);
