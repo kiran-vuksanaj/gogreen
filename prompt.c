@@ -6,5 +6,5 @@
 void print_prompt(){
   char cwd[256];
   getcwd(cwd,256);
-  printf("%s $ ",cwd);
+  printf("[pp%d/p%d]%s$ ",getppid(),getpid(),cwd);
 }
