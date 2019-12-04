@@ -36,6 +36,10 @@ void runchild(char **args){
     wait(&status);
     printf("Child exited: signal %d, status %d\n",WEXITSTATUS(status),WTERMSIG(status));
   }else{
-    execvp(args[0],args);
+    if( execvp(args[0],args) < 0 ){
+      printerr();
+      exit(errno);
+    }
+    printf("if it gets here something went wrong\n");
   }
 }
