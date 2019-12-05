@@ -16,6 +16,6 @@ char **parseargs(char *cmd,char * delim){
     }
   }
   out[i] = NULL;
-  out = realloc(out, i * sizeof(char *));
+  out = realloc(out, (i+1) * sizeof(char *));
   return out;
 }
