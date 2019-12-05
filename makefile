@@ -1,4 +1,4 @@
-ifeq ($DEBUG,true)
+ifeq ($(DEBUG),true)
 	CFLAGS = -g
 endif
 
