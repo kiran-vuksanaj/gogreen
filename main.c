@@ -14,7 +14,7 @@ int main(){
     print_prompt();
     char input[256];
     fgets(input,256,stdin);
-    exec_cmd(input);
+    exec_cmds(input);
   }
   return 0;
 }

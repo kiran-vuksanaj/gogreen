@@ -2,12 +2,13 @@
 #include<stdlib.h>
 #include<string.h>
 
-char **parseargs(char *cmd){
+
+char **parseargs(char *cmd,char * delim){
   int size = 16;
   char **out = malloc(size * sizeof(char *));
   int i = 0;
   while(cmd){
-    char *newtok = strsep(&cmd," \t\n");
+    char *newtok = strsep(&cmd,delim);
     if(*newtok) out[i++] = newtok;
     if(i >= size){
       size *= 2;
@@ -15,5 +16,6 @@ char **parseargs(char *cmd){
     }
   }
   out[i] = NULL;
+  out = realloc(out, i * sizeof(char *));
   return out;
 }

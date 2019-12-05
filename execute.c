@@ -12,8 +12,18 @@ void printerr(){
   printf("errno [%d]: %s\n",errno,strerror(errno));
 }
 
+void exec_cmds(char *cmd){
+  char **cmds = parseargs(cmd,";\n");
+  int i = 0;
+  while(cmds[i]){
+    exec_cmd(cmds[i++]); // inside this, args are malloc'd and freed; no memory leal
+  }
+  // this is NOT REACHED with exit(); there's a memory leak in that case!!
+  free(cmds);
+}
+
 void exec_cmd(char *cmd){
-  char **args = parseargs(cmd);
+  char **args = parseargs(cmd," ");
   if(!strcmp(args[0],"cd")){
     if( chdir(args[1]) < 0 ){
       printerr();
