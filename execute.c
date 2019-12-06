@@ -24,7 +24,7 @@ void exec_cmds(char *cmd){
 
 void exec_cmd(char *cmd){
   char **args = parseargs(cmd," ");
-  if(!args) return;
+  if(!args || !args[0]) return;
   if(!strcmp(args[0],"cd")){
     if( chdir(args[1]) < 0 ){
       printerr();
