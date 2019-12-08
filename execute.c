@@ -5,8 +5,11 @@
 
 #include<unistd.h>
 #include<sys/wait.h>
+#include<sys/types.h>
+#include<fcntl.h>
 #include"parseargs.h"
 #include"execute.h"
+#include"redirect.h"
 
 void printerr(){
   printf("errno [%d]: %s\n",errno,strerror(errno));
@@ -35,8 +38,15 @@ void exec_cmd(char *cmd){
     free(args);
     exit(0);
   }else{
+
+    int fd = open("inputfile",O_RDONLY);
+    int backup_fd = redirect(fd,R_STDIN);
+    
     runchild(args);
     free(args);
+
+    endredirect(backup_fd,R_STDIN);
+    close(fd);
   }
 }
 
