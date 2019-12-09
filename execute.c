@@ -45,7 +45,7 @@ void exec_cmd(char *cmd){
 
 void runchild(char **args){
   int std_backups[3];
-  redirect(std_backups,args);
+  parse_redirects(std_backups,args);
   remove_blanks(args);
   int f = fork();
   if(f){

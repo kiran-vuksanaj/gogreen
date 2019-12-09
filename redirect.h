@@ -3,7 +3,7 @@
 
 void remove_blanks(char **args);
 
-int redirect(int *bk_pointer, char **args);
+int parse_redirects(int *bk_pointer, char **args);
 
 int endredirect(int *backup_fd);
 

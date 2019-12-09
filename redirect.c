@@ -8,7 +8,25 @@
 
 #include"redirect.h"
 
-int redirect(int *bk_pointer, char **args){
+int redirect(int fd1,int fd2){
+  int out = dup(fd2);
+  if(out < 0) return -1;
+  if( dup2(fd1,fd2) < 0 ) return -1;
+  return out;
+}
+
+int redirect_filename(char **args,int i,int fd_std,char *filename,int flags){
+  int fd_file = open(filename,flags);
+  if(fd_file < 0) return -1;
+  int out = redirect(fd_file,fd_std);
+  if(out < 0) return -1;
+  if( close(fd_file) < 0 ) return -1;
+  args[i][0] = '\0';
+  args[i+1][0] = '\0';
+  return out;
+}
+
+int parse_redirects(int *bk_pointer, char **args){
   // return value 0/-1
   // TODO: expand beyond just single args
   int i;
@@ -16,28 +34,24 @@ int redirect(int *bk_pointer, char **args){
   i = 0;
   while(args[i]){
     // very temporary checking structure! feel free to tear this to shreds!
-    int fd_std = -1;
-    int options;
-    char *filename;
     if(!strcmp(args[i],">")) {
-      fd_std = STDOUT_FILENO;
-      options = O_WRONLY|O_TRUNC;
-      filename = args[i+1];
+      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC);
+      if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
     }
     else if(!strcmp(args[i],"<")) {
-      fd_std = STDOUT_FILENO;
-      options = O_RDONLY;
-      filename = args[i+1];
+      bk_pointer[STDIN_FILENO] = redirect_filename(args,i,STDIN_FILENO,args[i+1],O_RDONLY);
+      if( bk_pointer[STDIN_FILENO] < 0 ) return -1;
     }
-    if(fd_std > 0) {
-      bk_pointer[fd_std] = dup(fd_std);
-      if(bk_pointer[fd_std] < 0) return -1;
-      int fd_file = open(filename,options);
-      if(fd_file < 0) return -1;
-      if( dup2(fd_file,fd_std) < 0 ) return -1;
-      if( close(fd_file) < 0 ) return -1;
-      args[i][0] = '\0';
-      args[i+1][0] = '\0';
+    else if(!strcmp(args[i],">>")) {
+      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY);
+      if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
+    }
+    else if(!strcmp(args[i],"&>")) {
+      printf("redirecting both");
+      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC);
+      if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
+      bk_pointer[STDERR_FILENO] = redirect(STDOUT_FILENO,STDERR_FILENO);
+      if( bk_pointer[STDERR_FILENO] < 0 ) return -1;
     }
     i++;
   }
