@@ -37,24 +37,21 @@ void exec_cmd(char *cmd){
     printf("logout\n");
     free(args);
     exit(0);
-  }else{
-
-    int fd = open("inputfile",O_RDONLY);
-    int backup_fd = redirect(fd,R_STDIN);
-    
+  }else{  
     runchild(args);
     free(args);
-
-    endredirect(backup_fd,R_STDIN);
-    close(fd);
   }
 }
 
 void runchild(char **args){
+  int std_backups[3];
+  redirect(std_backups,args);
+  remove_blanks(args);
   int f = fork();
   if(f){
     int status;
     wait(&status);
+    endredirect(std_backups);
     printf("Child exited: signal %d, status %d\n",WEXITSTATUS(status),WTERMSIG(status));
   }else{
     if( execvp(args[0],args) < 0 ){
