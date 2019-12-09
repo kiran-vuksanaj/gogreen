@@ -16,7 +16,7 @@ int redirect(int fd1,int fd2){
 }
 
 int redirect_filename(char **args,int i,int fd_std,char *filename,int flags){
-  int fd_file = open(filename,flags);
+  int fd_file = open(filename,flags,0644);
   if(fd_file < 0) return -1;
   int out = redirect(fd_file,fd_std);
   if(out < 0) return -1;
@@ -35,7 +35,7 @@ int parse_redirects(int *bk_pointer, char **args){
   while(args[i]){
     // very temporary checking structure! feel free to tear this to shreds!
     if(!strcmp(args[i],">")) {
-      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC);
+      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
     }
     else if(!strcmp(args[i],"<")) {
@@ -43,12 +43,11 @@ int parse_redirects(int *bk_pointer, char **args){
       if( bk_pointer[STDIN_FILENO] < 0 ) return -1;
     }
     else if(!strcmp(args[i],">>")) {
-      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY);
+      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
     }
     else if(!strcmp(args[i],"&>")) {
-      printf("redirecting both");
-      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC);
+      bk_pointer[STDOUT_FILENO] = redirect_filename(args,i,STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
       bk_pointer[STDERR_FILENO] = redirect(STDOUT_FILENO,STDERR_FILENO);
       if( bk_pointer[STDERR_FILENO] < 0 ) return -1;
