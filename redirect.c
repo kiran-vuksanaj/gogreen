@@ -60,9 +60,12 @@ void clear_used_args(char **args,int i){
  * int parse_redirects(int bk_pointer[3], char **args) -- scan through args and configure redirects with backups
  * @param int bk_pointer[3]; array in which backup pointers can be stored for future restoration
  * @param char **args; null-terminated array of arg strings
- * -searches
+ * -searches through args for matches to redirect symbols: [>,>>,<,&>,&>>]
+ * -as found, redirects the filename in the following arg to the relevant standard stream with appropriate flags
+ * -replaces args used (the symbol and subsequent filenames) with empty strings (MUST BE CLEARED; see stry_util.c/remove_blanks())
  * RETURN VALUE: 0 on success, -1 on failure
- * -relies on indicators of redirects being their own arg, (aka with whitespace on either side)
+ * -upon return, bk_pointer is populated with -1 for streams not redirected and, when redirected, fd's containing backups
+ * -relies on indicators of redirects being their own arg (aka with whitespace on either side)
  */
 
 int parse_redirects(int *bk_pointer, char **args){
@@ -73,25 +76,32 @@ int parse_redirects(int *bk_pointer, char **args){
   i = 0;
   while(args[i]){
     // very temporary checking structure! feel free to tear this to shreds!
+    // loops through args, checking for matches to the redirect symbols
+    // when found: runs redirect_filename() with args[i+1] as the filename, the proper stream to redirect into, and flags to handle read/write/trunc
     if(!strcmp(args[i],">")) {
+      // (applies for all subsequent if statements as well!)
+      // redirect filename into stream, and store backup file descriptor in the proper index of bk_pointer
       bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC|O_CREAT);
+      // if redirect_filename() returned <0, an error occured; return -1
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
+      // set args[i] and args[i+1] to empty strings
       clear_used_args(args,i);
     }
-    else if(!strcmp(args[i],"<")) {
+    else if(!strcmp(args[i],"<")) { // see first if statement; same pattern
       bk_pointer[STDIN_FILENO] = redirect_filename(STDIN_FILENO,args[i+1],O_RDONLY);
       if( bk_pointer[STDIN_FILENO] < 0 ) return -1;
       clear_used_args(args,i);
     }
-    else if(!strcmp(args[i],">>")) {
+    else if(!strcmp(args[i],">>")) { // see first if statement; same pattern
       bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,args[i+1],O_WRONLY|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
       clear_used_args(args,i);
     }
-    else if(!strcmp(args[i],"&>")) {
+    else if(!strcmp(args[i],"&>")) { // see first if statement; same pattern (at first)
       bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
       clear_used_args(args,i);
+      // copy the stdout file into stderr as well; has to be the SAME opened file as stdout, or else the cursor won't move properly
       bk_pointer[STDERR_FILENO] = redirect(STDOUT_FILENO,STDERR_FILENO);
       if( bk_pointer[STDERR_FILENO] < 0 ) return -1;
       clear_used_args(args,i);
@@ -100,13 +110,22 @@ int parse_redirects(int *bk_pointer, char **args){
   }
 }
 
+/**
+ * int endredirect(int backups[3]) -- restored earlier state of streams from backups
+ * -for each of the three streams, if the stored backup (backups[fd]) is not -1, the backup is copied back into the original stream
+ * -the backup copy of the previous stream state is subsequently closed
+ * RETURN VALUE: 0 on success, -1 on failure
+ */
+
 int endredirect(int *backups){
   int i;
   for(i=0;i<3;i++){
     if(backups[i] != -1){
+      // (for each of the three streams): if there exists a backup ( != -1 ), copy contents of that backup into the stream position (return -1 on error)
       if(dup2(backups[i],i)<0) return -1;
+      // now that the contents are restored, close the old backup (return -1 on error, although i cannot imagine what that error would be lmao)
       if(close(backups[i])) return -1;
     }
   }
-  return 0;
+  return 0; // success
 }
