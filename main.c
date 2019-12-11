@@ -14,6 +14,7 @@ int main(){
     print_prompt();
     char input[256];
     fgets(input,256,stdin);
+    if(!isatty(STDIN_FILENO)) printf("%s",input);
     exec_cmds(input);
   }
   return 0;
