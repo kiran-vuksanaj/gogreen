@@ -10,6 +10,7 @@
 #include"parseargs.h"
 #include"execute.h"
 #include"redirect.h"
+#include"stry_util.h"
 
 void printerr(){
   printf("errno [%d]: %s\n",errno,strerror(errno));

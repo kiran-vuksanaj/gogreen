@@ -66,14 +66,3 @@ int endredirect(int *backups){
   }
   return 0;
 }
-
-void remove_blanks(char **args){
-  int i = 0;
-  int j = 0;
-  while(args[i]){
-    args[j] = args[i];
-    if(args[j][0]) j++;
-    i++;
-  }
-  args[j] = NULL;
-}
