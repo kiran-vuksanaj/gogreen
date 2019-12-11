@@ -64,7 +64,7 @@ void prunchild(char **args){
   }else{
     close(pipefds[0]);
     int out_backup = redirect(pipefds[1],STDOUT_FILENO);
-    runchild(args);
+    prunchild(args);
     dup2(out_backup,STDOUT_FILENO);
     close(pipefds[1]);
     exit(0);
