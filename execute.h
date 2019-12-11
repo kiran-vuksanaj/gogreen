@@ -3,6 +3,7 @@
 
 void exec_cmds(char *cmd);
 void exec_cmd(char *cmd);
+void prunchild(char **args);
 void runchild(char **args);
 
 #endif

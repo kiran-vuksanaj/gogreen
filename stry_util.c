@@ -16,6 +16,6 @@ void remove_blanks(char **args){
 char **strrystr(char **stry,char *str){
   int i = 0;
   while(stry[i]) i++;
-  while( i > 0 && strcmp(stry[i],str)) i--;
-  return i==0 ? NULL : stry+i;
+  while( i-- > 0 && strcmp(stry[i],str));
+  return i<0 ? NULL : stry+i;
 }

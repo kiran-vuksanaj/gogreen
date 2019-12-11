@@ -3,6 +3,6 @@
 
 void remove_blanks(char **stry);
 
-void strrystr(char **stry);
+char **strrystr(char **stry,char *str);
 
 #endif

@@ -39,8 +39,35 @@ void exec_cmd(char *cmd){
     free(args);
     exit(0);
   }else{  
-    runchild(args);
+    prunchild(args);
     free(args);
+  }
+}
+
+void prunchild(char **args){
+  char **pipe_ptr = strrystr(args,"|");
+  if(!pipe_ptr){
+    runchild(args);
+    return;
+  }
+  *(pipe_ptr++) = NULL;
+  int pipefds[2];
+  pipe(pipefds);
+  int f = fork();
+  if(f){
+    close(pipefds[1]);
+    int status;
+    wait(&status);
+    int in_backup = redirect(pipefds[0],STDIN_FILENO);
+    runchild(pipe_ptr);
+    dup2(in_backup,STDIN_FILENO);
+  }else{
+    close(pipefds[0]);
+    int out_backup = redirect(pipefds[1],STDOUT_FILENO);
+    runchild(args);
+    dup2(out_backup,STDOUT_FILENO);
+    close(pipefds[1]);
+    exit(0);
   }
 }
 
@@ -53,7 +80,7 @@ void runchild(char **args){
     int status;
     wait(&status);
     endredirect(std_backups);
-    printf("Child exited: signal %d, status %d\n",WEXITSTATUS(status),WTERMSIG(status));
+    //    printf("Child exited: signal %d, status %d\n",WEXITSTATUS(status),WTERMSIG(status));
   }else{
     if( execvp(args[0],args) < 0 ){
       printerr();
