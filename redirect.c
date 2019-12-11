@@ -26,15 +26,24 @@ int redirect(int fd1,int fd2){
 
 /**
  * int redirect_filename(int fd_std,char *filename,int flags) -- configure redirect of a given filename
- * 
+ * @param int fd_std - descriptor of std file that will be redirected into
+ * @param char *filename - filename of file to be redirected in
+ * @param int flags - flags to be used on open
+ * -opens a filename with flags and redirects the newly opened file into the given file descriptor
+ * RETURN VALUE: file descriptor containing the previous contents of the standard fd location (as would be returned from redirect() - see above)
+ *               -1 on error
  */
 
 int redirect_filename(int fd_std,char *filename,int flags){
+  // open file with filename, flags, and a reasonable mode for new files ( + handle errors)
   int fd_file = open(filename,flags,0644);
   if(fd_file < 0) return -1;
+  // call redirect() using newly generated file descriptor ( + handle errors)  
   int out = redirect(fd_file,fd_std);
   if(out < 0) return -1;
+  // now that the new file descriptor has been copied into another fd, the generated file can be closed
   if( close(fd_file) < 0 ) return -1;
+  // return result of redirect call
   return out;
 }
 
@@ -46,6 +55,15 @@ void clear_used_args(char **args,int i){
   args[i][0] = '\0';
   args[i+1][0] = '\0';
 }
+
+/**
+ * int parse_redirects(int bk_pointer[3], char **args) -- scan through args and configure redirects with backups
+ * @param int bk_pointer[3]; array in which backup pointers can be stored for future restoration
+ * @param char **args; null-terminated array of arg strings
+ * -searches
+ * RETURN VALUE: 0 on success, -1 on failure
+ * -relies on indicators of redirects being their own arg, (aka with whitespace on either side)
+ */
 
 int parse_redirects(int *bk_pointer, char **args){
   // return value 0/-1
