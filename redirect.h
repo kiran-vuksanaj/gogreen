@@ -3,7 +3,9 @@
 
 int redirect(int fd1,int fd2);
 
-int redirect_filename(char **args,int i,int fd_std,char *filename,int flags);
+int redirect_filename(int fd_std,char *filename,int flags);
+
+void clear_used_args(char **args,int i);
 
 void remove_blanks(char **args);
 
