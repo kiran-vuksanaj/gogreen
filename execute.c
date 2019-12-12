@@ -25,29 +25,35 @@ void printerr(){
  * @param cmd: null-terminated string of commands, as would be entered in a shell.
  * -parses input by semicolons and newlines to separate into a series of commands to be run individually
  * -runs each commands (using exec_cmd)
- * potential memory leak of commands that follow `exit;`, but all memory is freed immediately afterwards upon exit of the program.
+ * (RESOLVED) [potential memory leak of commands that follow `exit;`, but all memory is freed immediately afterwards upon exit of the program.]
  */
 
 void exec_cmds(char *cmd){
   char **cmds = parseargs(cmd,";\n");
   int i = 0;
+  int status;
   while(cmds[i]){
-    if(cmds[i][0]) exec_cmd(cmds[i++]); // inside this, args are malloc'd and freed; no memory leak
+    if(cmds[i][0]) status = exec_cmd(cmds[i++]); // inside this, args are malloc'd and freed; no memory leak
+    // case: exec_cmd did an exit; exit program normally, free commands
+    if(status < 0) {
+      free(cmds);
+      exit(0);
+    }
   }
-  // this is NOT REACHED with exit(); there's a memory leak in that case!!
   free(cmds);
 }
 
 /**
- * void exec_cmd(char *cmd)
+ * int exec_cmd(char *cmd)
  * @param cmd: null-terminated single command string (no semicolons\newlines), as would be entered in a shell
  * -parses input by spaces and interprets whether a "special case" (`cd` or `exit`) is necessary
  * -executes chdir and exit where necessary, and otherwise runs prunchild() to handle pipes and children
+ * RETURN VALUE: 0 on success, -1 on exit(NOT FAILURE)
  */
 
-void exec_cmd(char *cmd){
+int exec_cmd(char *cmd){
   char **args = parseargs(cmd," ");
-  if(!args || !args[0]) return;
+  if(!args || !args[0]) return 0;
   if(!strcmp(args[0],"cd")){
     if( chdir(args[1]) < 0 ){
       printerr();
@@ -56,11 +62,12 @@ void exec_cmd(char *cmd){
   }else if(!strcmp(args[0],"exit")){
     printf("logout\n");
     free(args);
-    exit(0);
+    return -1;
   }else{  
     prunchild(args);
     free(args);
   }
+  return 0;
 }
 
 /**
