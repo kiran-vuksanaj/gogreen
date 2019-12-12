@@ -48,7 +48,7 @@ void exec_cmds(char *cmd){
  * @param cmd: null-terminated single command string (no semicolons\newlines), as would be entered in a shell
  * -parses input by spaces and interprets whether a "special case" (`cd` or `exit`) is necessary
  * -executes chdir and exit where necessary, and otherwise runs prunchild() to handle pipes and children
- * RETURN VALUE: 0 on success, -1 on exit(NOT FAILURE), >0 for error in runchild
+ * RETURN VALUE: 0 on success, -1 on exit(NOT FAILURE), >0 for error in runchild (return value/errno of child)
  */
 
 int exec_cmd(char *cmd){
@@ -80,6 +80,8 @@ int exec_cmd(char *cmd){
  * -recursive case: 
  *   -find last instance of | arg, create a child which recursively runs exec_cmd_p() on all args before "|" and has a pipe to the parent carrying stdout outputs
  *   -call exec_cmd() on the args after the last "|", with the earlier pipe redirected into stdin
+ * -in the event of an error early in the pipe, the rest of the pipe series is terminated.
+ * RETURN VALUE: 0 on success, otherwise return value of first exec_cmd that doesn't return 0
  * (RESOLVED) [-relies on "|" being separated by whitespace on either side! otherwise the pipe won't be found]
  */
 
@@ -134,12 +136,13 @@ int exec_cmd_p(char *cmd){
 }
 
 /**
- * void runchild(char *cmd) - handle redirects and forks for single command (no pipes no semicolons)
+ * int runchild(char *cmd) - handle redirects and forks for single command (no pipes no semicolons)
  * @param args: null-terminated array of null-terminated args which should be executed in an execvp() call
  * -call parse_redirects() to set up redirects as specified by >,>>,<,&>,&>> (see redirect.c)
  * -fork and call execvp() on remaining args
  * -restore redirects to what they were previously (not necessarily to normal std, if a pipe is in place)
  * -relies on any redirect symbol being separated by some amount of whitespace from the filename and command
+ * RETURN VALUE: on success, return value of execvp'd program; otherwise, errno of execvp'd program
  */
 
 
