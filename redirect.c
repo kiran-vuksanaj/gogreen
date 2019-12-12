@@ -48,12 +48,33 @@ int redirect_filename(int fd_std,char *filename,int flags){
 }
 
 /**
- * void clear_used_args(char **args,int i) -- set args[i] and args[i+1] to be empty strings (helper method)
+ * char *getfilename(char **args, int i, char *symbol) -- find filename associated with redirect symbol
+ * @param char **args; null-terminated array of args in which to look
+ * @param i; index at which to look for symbol
+ * @param char *symbol; redirect symbol [>,>>,<,&>,&>>] to seek
+ * -looks for filename immediately following symbol; if not found, returns the arg immediately following
+ * RETURN VALUE: pointer to filename; NULL on failure
+ * -KNOWN BUG: fails to consider another redirect symbol following filename without whitespace separating
  */
 
-void clear_used_args(char **args,int i){
-  args[i][0] = '\0';
-  args[i+1][0] = '\0';
+char *getfilename(char **args,int i,char *symbol){
+  char *filename = strstr(args[i],symbol);
+  //  printf("symbol + filename: [%s]\n",filename);
+  if(!filename) return NULL;
+  filename += strlen(symbol);
+  //  printf("just filename: [%s]\n",filename);
+  if (*filename) return filename;
+  return args[i+1];
+}
+
+/**
+ * void clear_used_args(char **args,int i, char *symbol) -- sets symbol and filename (as foudn in getfilename()) to null
+ */
+
+void clear_used_args(char **args,int i,char *symbol){
+  char *symbol_loc = strstr(args[i],symbol);
+  *symbol_loc = '\0';
+  if(!symbol_loc[strlen(symbol)]) *args[i+1] = '\0';
 }
 
 /**
@@ -78,33 +99,32 @@ int parse_redirects(int *bk_pointer, char **args){
     // very temporary checking structure! feel free to tear this to shreds!
     // loops through args, checking for matches to the redirect symbols
     // when found: runs redirect_filename() with args[i+1] as the filename, the proper stream to redirect into, and flags to handle read/write/trunc
-    if(!strcmp(args[i],">")) {
+    if(strstr(args[i],">")) {
       // (applies for all subsequent if statements as well!)
       // redirect filename into stream, and store backup file descriptor in the proper index of bk_pointer
-      bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC|O_CREAT);
+      bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,getfilename(args,i,">"),O_WRONLY|O_TRUNC|O_CREAT);
       // if redirect_filename() returned <0, an error occured; return -1
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
-      // set args[i] and args[i+1] to empty strings
-      clear_used_args(args,i);
+      // set args[i] and getfilename(args,i,"") to empty strings
+      clear_used_args(args,i,">");
     }
-    else if(!strcmp(args[i],"<")) { // see first if statement; same pattern
-      bk_pointer[STDIN_FILENO] = redirect_filename(STDIN_FILENO,args[i+1],O_RDONLY);
+    else if(strstr(args[i],"<")) { // see first if statement; same pattern
+      bk_pointer[STDIN_FILENO] = redirect_filename(STDIN_FILENO,getfilename(args,i,"<"),O_RDONLY);
       if( bk_pointer[STDIN_FILENO] < 0 ) return -1;
-      clear_used_args(args,i);
+      clear_used_args(args,i,"<");
     }
-    else if(!strcmp(args[i],">>")) { // see first if statement; same pattern
-      bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,args[i+1],O_WRONLY|O_CREAT);
+    else if(strstr(args[i],">>")) { // see first if statement; same pattern
+      bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,getfilename(args,i,">>"),O_WRONLY|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
-      clear_used_args(args,i);
+      clear_used_args(args,i,">>");
     }
-    else if(!strcmp(args[i],"&>")) { // see first if statement; same pattern (at first)
-      bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,args[i+1],O_WRONLY|O_TRUNC|O_CREAT);
+    else if(strstr(args[i],"&>")) { // see first if statement; same pattern (at first)
+      bk_pointer[STDOUT_FILENO] = redirect_filename(STDOUT_FILENO,getfilename(args,i,"&>"),O_WRONLY|O_TRUNC|O_CREAT);
       if( bk_pointer[STDOUT_FILENO] < 0 ) return -1;
-      clear_used_args(args,i);
       // copy the stdout file into stderr as well; has to be the SAME opened file as stdout, or else the cursor won't move properly
       bk_pointer[STDERR_FILENO] = redirect(STDOUT_FILENO,STDERR_FILENO);
       if( bk_pointer[STDERR_FILENO] < 0 ) return -1;
-      clear_used_args(args,i);
+      clear_used_args(args,i,"&>");
     }
     i++;
   }
