@@ -4,6 +4,6 @@
 void exec_cmds(char *cmd);
 int exec_cmd(char *cmd);
 int exec_cmd_p(char *cmd);
-void runchild(char **args);
+int runchild(char **args);
 
 #endif
