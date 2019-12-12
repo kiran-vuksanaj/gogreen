@@ -33,7 +33,7 @@ void exec_cmds(char *cmd){
   int i = 0;
   int status;
   while(cmds[i]){
-    if(cmds[i][0]) status = exec_cmd(cmds[i++]); // inside this, args are malloc'd and freed; no memory leak
+    if(cmds[i][0]) status = exec_cmd_p(cmds[i++]); // inside this, args are malloc'd and freed; no memory leak
     // case: exec_cmd did an exit; exit program normally, free commands
     if(status < 0) {
       free(cmds);
@@ -64,7 +64,7 @@ int exec_cmd(char *cmd){
     free(args);
     return -1;
   }else{  
-    prunchild(args);
+    runchild(args);
     free(args);
   }
   return 0;
@@ -80,21 +80,21 @@ int exec_cmd(char *cmd){
  * -relies on "|" being separated by whitespace on either side! otherwise the pipe won't be found
  */
 
-void prunchild(char **args){
+int exec_cmd_p(char *cmd){
   // locate last instance of "|" in the arg array (see stry_util.c)
-  char **pipe_ptr = strrystr(args,"|");
+  char *pipe_ptr = strrchr(cmd,'|');
   // base case: no pipe exists; call runchild() as normal
   if(!pipe_ptr){
-    runchild(args);
-    return;
+    return exec_cmd(cmd);
   }
   // recursive case: separate arg array at pipe pointer by turning it into NULL, move pointer to immediately after the former "|"
-  *(pipe_ptr++) = NULL;
+  *(pipe_ptr++) = '\0';
   // create pipe
   int pipefds[2];
   pipe(pipefds);
   // fork, manage processes
   int f = fork();
+  int status;
   if(f){
     // PARENT (child code, below, runs first) -- execute post pipe
     // close unnecessary write end of pipe
@@ -104,7 +104,7 @@ void prunchild(char **args){
     wait(&status);
     // redirect read end of pipe into stdin (see redirect.c), and run child (post-final pipe) as normal
     int in_backup = redirect(pipefds[READ],STDIN_FILENO);
-    runchild(pipe_ptr);
+    status = exec_cmd(pipe_ptr);
     // restore stdin from its backup
     dup2(in_backup,STDIN_FILENO);
     // close backup and read end of pipe (it's now ready to be destroyed)
@@ -117,7 +117,7 @@ void prunchild(char **args){
     // redirect write end of pipe into stdout (see redirect.c), and recursively run pre-pipe
     // by executing recursively like this, commands run first to last
     int out_backup = redirect(pipefds[WRITE],STDOUT_FILENO);
-    prunchild(args);
+    status = exec_cmd_p(cmd);
     // restore stdout from its backup
     dup2(out_backup,STDOUT_FILENO);
     // close backup and write end of pipe
@@ -126,6 +126,7 @@ void prunchild(char **args){
     // exit, return to parent
     exit(0);
   }
+  return status;
 }
 
 /**
