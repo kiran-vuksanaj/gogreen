@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
-
+#include<string.h>
 #include<unistd.h>
 
 /**
@@ -13,4 +13,16 @@ void print_prompt(){
   char cwd[256];
   getcwd(cwd,256);
   printf("[pp%d/p%d]%s$ ",getppid(),getpid(),cwd);
+}
+
+void getcmd(char *buf){
+  int c = getchar();
+  while( c != '\n' ){
+    *(buf++) = c;
+    c = getchar();
+  }
+}
+
+int has_escape(char *input){
+  return strstr(input,"\e[A") || strstr(input,"\e[B");
 }
