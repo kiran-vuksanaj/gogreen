@@ -4,6 +4,5 @@
 void enable_rawmode();
 void reset_termios();
 void config_exit();
-void exit_clean(int val);
 
 #endif

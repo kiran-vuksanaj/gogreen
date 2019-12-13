@@ -20,7 +20,7 @@ int main(){
     char input[256];
     getcmd(input);
     printf("%s\n",input);
-    exec_cmds(input);
+    if(exec_cmds(input) < 0) break;
   }
   return 0;
 }

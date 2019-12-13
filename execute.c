@@ -11,7 +11,6 @@
 #include"execute.h"
 #include"redirect.h"
 #include"stry_util.h"
-#include"entry_exit.h"
 
 #define READ 0
 #define WRITE 1
@@ -29,7 +28,7 @@ void printerr(){
  * (RESOLVED) [potential memory leak of commands that follow `exit;`, but all memory is freed immediately afterwards upon exit of the program.]
  */
 
-void exec_cmds(char *cmd){
+int exec_cmds(char *cmd){
   char **cmds = parseargs(cmd,";\n");
   int i = 0;
   int status;
@@ -38,10 +37,11 @@ void exec_cmds(char *cmd){
     // case: exec_cmd did an exit; exit program normally, free commands
     if(status < 0) {
       free(cmds);
-      exit_clean(0);
+      return -1;
     }
   }
   free(cmds);
+  return 0;
 }
 
 /**
