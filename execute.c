@@ -11,6 +11,7 @@
 #include"execute.h"
 #include"redirect.h"
 #include"stry_util.h"
+#include"entry_exit.h"
 
 #define READ 0
 #define WRITE 1
@@ -37,7 +38,7 @@ void exec_cmds(char *cmd){
     // case: exec_cmd did an exit; exit program normally, free commands
     if(status < 0) {
       free(cmds);
-      exit(0);
+      exit_clean(0);
     }
   }
   free(cmds);

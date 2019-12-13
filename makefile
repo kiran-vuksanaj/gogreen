@@ -2,13 +2,13 @@ ifeq ($(DEBUG),true)
 	CFLAGS = -g
 endif
 
-all: main.o parseargs.o execute.o prompt.o redirect.o stry_util.o
-	gcc $(CFLAGS) -o shash main.o parseargs.o execute.o prompt.o redirect.o stry_util.o
-main.o: main.c parseargs.h execute.h prompt.h
+all: main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o
+	gcc $(CFLAGS) -o shash main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o
+main.o: main.c parseargs.h execute.h prompt.h entry_exit.h
 	gcc $(CFLAGS) -c main.c
 parseargs.o: parseargs.c parseargs.h
 	gcc $(CFLAGS) -c parseargs.c
-execute.o:  execute.c execute.h parseargs.h redirect.h stry_util.h
+execute.o:  execute.c execute.h parseargs.h redirect.h stry_util.h entry_exit.h
 	gcc $(CFLAGS) -c execute.c
 prompt.o: prompt.c prompt.h
 	gcc $(CFLAGS) -c prompt.c
