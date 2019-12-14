@@ -15,14 +15,42 @@ void print_prompt(){
   printf("[pp%d/p%d]%s$ ",getppid(),getpid(),cwd);
 }
 
-void getcmd(char *buf){
-  int c = getchar();
-  while( c != '\n' ){
-    *(buf++) = c;
-    c = getchar();
-  }
+void handleansi(){
+  
 }
 
-int has_escape(char *input){
-  return strstr(input,"\e[A") || strstr(input,"\e[B");
+void insshift(char *s,int i,char c){
+  strcpy(s+i+1,s+i);
+  s[i] = c;
+}
+
+void delshift(char *s,int i){
+  strcpy(s+i-1,s+i);
+}
+
+void getcmd(char *buf){
+  int i = 0;
+  *buf = '\0';
+  printf("\e[s");
+  int c = getchar();
+  while( c != '\n' ){
+    // printf("/%d/",c);
+    switch(c){
+    case '\e':
+      // printf("esc");
+      handleansi();
+      break;
+    case 127: // BACKSPACE
+      // printf("del");
+      delshift(buf,--i);
+      break;
+    default:
+      insshift(buf,i++,c);
+      break;
+    }
+    printf("\e[u\e[K%s",buf);
+    c = getchar();
+  }
+  buf[i] = '\0';
+  putchar(c); // newline
 }
