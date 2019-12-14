@@ -5,25 +5,32 @@
 #include"cmdstack.h"
 
 static struct cmd_node *stack;
-
+static struct cmd_node *top;
 void init_cstack(){
   stack = malloc( sizeof(struct cmd_node) );
   stack->next = NULL;
   stack->prev = NULL;
-  *(stack->cmd) = '\0'; 
+  *(stack->cmd) = '\0';
+  top = malloc( sizeof(struct cmd_node) );
+  top->prev = stack;
+  top->next = NULL;
+  *(top->cmd) = '\0';
+  stack->next = top;
 }
 void clear_stack(){
   free_back(stack->prev);
   free_fwd(stack->next);
   free(stack);
+  free(top);
   stack = NULL;
+  top = NULL;
 }
 
 void push_cmd(char *cmd){
   struct cmd_node *node = malloc( sizeof(struct cmd_node) );
-  node->prev = stack;
-  node->next = NULL;
-  if(stack->next) free_fwd(stack->next);
+  node->prev = stack->prev;
+  node->next = top;
+  free_fwd(stack);
   strncpy(node->cmd,cmd,512);
   stack = node;
 }
@@ -38,6 +45,7 @@ void fwd_cstack(){
 
 void bk_cstack(){
   if(stack->prev) stack = stack->prev;
+  printf("[[%s]]",stack->cmd);
 }
 
 void free_back(struct cmd_node *node){
@@ -46,5 +54,5 @@ void free_back(struct cmd_node *node){
 }
 void free_fwd(struct cmd_node *node){
   if(node->next) free_fwd(node->next);
-  free(node);
+  if(node != top) free(node);
 }
