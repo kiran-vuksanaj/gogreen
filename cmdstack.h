@@ -7,10 +7,16 @@ struct cmd_node {
   char cmd[512];
 };
 
-struct cmd_node *push(struct cmd_node *node,char *cmd);
+void init_cstack();
+void clear_stack();
+
+void push_cmd(char *cmd);
+void put_cmd(char *buf);
+
+void fwd_cstack();
+void bk_cstack();
 
 void free_back(struct cmd_node *node);
-
 void free_fwd(struct cmd_node *node);
 
 #endif
