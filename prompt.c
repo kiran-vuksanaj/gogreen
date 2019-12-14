@@ -19,15 +19,20 @@ void handleansi(){
   
 }
 
-void insshift(char *s,int i,char c){
-  if(i<0) return;
+int insshift(char *s,int i,char c){
+  // printf("%d\n",i);
+  if( i < 0 ) return 0;
+  if( i > strlen(s) ) return strlen(s);
   strcpy(s+i+1,s+i);
   s[i] = c;
+  return ++i;
 }
 
-void delshift(char *s,int i){
-  if(i<=0) return;
+int delshift(char *s,int i){
+  if(i<=0) return 0;
+  if(i>strlen(s)) return strlen(s);
   strcpy(s+i-1,s+i);
+  return --i;
 }
 
 void getcmd(char *buf){
@@ -44,10 +49,10 @@ void getcmd(char *buf){
       break;
     case 127: // BACKSPACE
       // printf("del");
-      delshift(buf,i--);
+      i = delshift(buf,i);
       break;
     default:
-      insshift(buf,i++,c);
+      i = insshift(buf,i,c);
       break;
     }
     printf("\e[u\e[K%s",buf);
