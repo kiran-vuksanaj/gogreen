@@ -20,11 +20,13 @@ void handleansi(){
 }
 
 void insshift(char *s,int i,char c){
+  if(i<0) return;
   strcpy(s+i+1,s+i);
   s[i] = c;
 }
 
 void delshift(char *s,int i){
+  if(i<=0) return;
   strcpy(s+i-1,s+i);
 }
 
@@ -42,7 +44,7 @@ void getcmd(char *buf){
       break;
     case 127: // BACKSPACE
       // printf("del");
-      delshift(buf,--i);
+      delshift(buf,i--);
       break;
     default:
       insshift(buf,i++,c);
