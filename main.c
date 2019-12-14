@@ -14,12 +14,13 @@
 int main(){
   // continue loop of print prompt, execute command, repeat forever (until signal interrupts or exited from interior)
   config_exit();
+  enable_rawmode();
   char preload[256] = "ls -al\n";
   while(1){
     print_prompt();
     char input[256];
     getcmd(input);
-    printf("%s\n",input);
+    printf("[%s]\n",input);
     if(exec_cmds(input) < 0) break;
   }
   return 0;
