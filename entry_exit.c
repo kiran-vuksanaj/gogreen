@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<termios.h>
-
+#include"cmdstack.h"
 struct termios orig_ios;
 
 void enable_rawmode() {
@@ -23,4 +23,5 @@ void reset_termios() {
 
 void config_exit() {
   atexit(reset_termios);
+  atexit(clear_stack);
 }
