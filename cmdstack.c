@@ -23,7 +23,7 @@ void push_cmd(char *cmd){
   struct cmd_node *node = malloc( sizeof(struct cmd_node) );
   node->prev = stack;
   node->next = NULL;
-  free_fwd(stack->next);
+  if(stack->next) free_fwd(stack->next);
   strncpy(node->cmd,cmd,512);
   stack = node;
 }

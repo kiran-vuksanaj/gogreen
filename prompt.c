@@ -4,6 +4,7 @@
 #include<unistd.h>
 
 #include"prompt.h"
+#include"cmdstack.h"
 
 /**
  * void print_prompt() -- print prompt to precede command
@@ -52,6 +53,14 @@ int handleansi(char *s,int i){
   if(c != '[') return i;
   c = getchar();
   switch(c){
+  case 'A':
+    bk_cstack();
+    put_cmd(s);
+    return strlen(s);
+  case 'B':
+    fwd_cstack();
+    put_cmd(s);
+    return strlen(s);
   case 'D':
     return i-1;
   case 'C':

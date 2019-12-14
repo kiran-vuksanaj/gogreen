@@ -4,7 +4,7 @@ endif
 
 all: main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o cmdstack.o
 	gcc $(CFLAGS) -o shash main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o cmdstack.o
-main.o: main.c parseargs.h execute.h prompt.h entry_exit.h
+main.o: main.c parseargs.h execute.h prompt.h entry_exit.h cmdstack.h
 	gcc $(CFLAGS) -c main.c
 parseargs.o: parseargs.c parseargs.h
 	gcc $(CFLAGS) -c parseargs.c

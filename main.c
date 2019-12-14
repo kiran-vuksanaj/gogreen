@@ -10,16 +10,19 @@
 #include"execute.h"
 #include"prompt.h"
 #include"entry_exit.h"
+#include"cmdstack.h"
 
 int main(){
   // continue loop of print prompt, execute command, repeat forever (until signal interrupts or exited from interior)
   config_exit();
+  init_cstack();
   char preload[256] = "ls -al\n";
   while(1){
     print_prompt();
     char input[256];
     enable_rawmode();
     getcmd(input);
+    push_cmd(input);
     reset_termios();
     printf("[%s]\n",input);
     if(exec_cmds(input) < 0) break;
