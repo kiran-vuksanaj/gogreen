@@ -5,54 +5,74 @@
 #include"cmdstack.h"
 
 static struct cmd_node *stack;
-static struct cmd_node *top;
+
+
 void init_cstack(){
+  //printf("malloc stack init\n");
   stack = malloc( sizeof(struct cmd_node) );
-  stack->next = NULL;
   stack->prev = NULL;
-  *(stack->cmd) = '\0';
-  top = malloc( sizeof(struct cmd_node) );
-  top->prev = stack;
-  top->next = NULL;
-  *(top->cmd) = '\0';
-  stack->next = top;
+  stack->next = NULL;
+  stack->cmd = NULL;
 }
 void clear_stack(){
-  free_back(stack->prev);
   free_fwd(stack->next);
+  free_back(stack->prev);
   free(stack);
-  free(top);
-  stack = NULL;
-  top = NULL;
 }
 
-void push_cmd(char *cmd){
+void push_cmd(){
+  //printf("malloc permabuf %lu\n",strlen(stack->cmd)+1);
+  char *permabuf = malloc( strlen(stack->cmd) + 1 );
+  //printf("permabuf malloc'd\n");
+  strcpy(permabuf,stack->cmd);
+  stack->cmd = permabuf;
+  free_fwd(stack->next);
+  //printf("malloc new node");
   struct cmd_node *node = malloc( sizeof(struct cmd_node) );
-  node->prev = stack->prev;
-  node->next = top;
-  free_fwd(stack);
-  strncpy(node->cmd,cmd,512);
+  node->prev = stack;
+  stack->next = node;
+  node->next = NULL;
+  node->cmd = NULL;
+
   stack = node;
 }
-
-void put_cmd(char *buf){
-  strncpy(buf,stack->cmd,512);
+void link_cstack(char *buf){
+  stack->cmd = buf;
 }
 
-void fwd_cstack(){
-  if(stack->next) stack = stack->next;
+void fwd_cstack(char *buf){
+  if(stack->next){
+    // printf("malloc fdwrite\n");
+    stack->cmd = malloc( strlen(buf) + 1);
+    strcpy(stack->cmd,buf);
+    stack = stack->next;
+    strcpy(buf,stack->cmd);
+    free(stack->cmd);
+    stack->cmd = buf;
+  }
+}
+void bk_cstack(char *buf){
+  if(stack->prev){
+    //printf("malloc bkwrite\n");
+    stack->cmd = malloc( strlen(buf) + 1);
+    strcpy(stack->cmd,buf);
+    stack = stack->prev;
+    strcpy(buf,stack->cmd);
+    free(stack->cmd);
+    stack->cmd = buf;
+  }
 }
 
-void bk_cstack(){
-  if(stack->prev) stack = stack->prev;
-  printf("[[%s]]",stack->cmd);
-}
-
-void free_back(struct cmd_node *node){
-  if(node->prev) free_back(node->prev);
+void free_node(struct cmd_node *node){
+  //printf("free node (%p)\n",node);
+  free(node->cmd);
   free(node);
 }
+void free_back(struct cmd_node *node){
+  if(node && node->prev) free_back(node->prev);
+  if(node) free_node(node);
+}
 void free_fwd(struct cmd_node *node){
-  if(node->next) free_fwd(node->next);
-  if(node != top) free(node);
+  if(node && node->next) free_fwd(node->next);
+  if(node) free_node(node);
 }

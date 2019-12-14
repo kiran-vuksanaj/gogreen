@@ -21,6 +21,7 @@ int main(){
     print_prompt();
     char input[256];
     enable_rawmode();
+    link_cstack(input);
     getcmd(input);
     push_cmd(input);
     reset_termios();

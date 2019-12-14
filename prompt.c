@@ -54,12 +54,10 @@ int handleansi(char *s,int i){
   c = getchar();
   switch(c){
   case 'A':
-    bk_cstack();
-    put_cmd(s);
+    bk_cstack(s);
     return strlen(s);
   case 'B':
-    fwd_cstack();
-    put_cmd(s);
+    fwd_cstack(s);
     return strlen(s);
   case 'D':
     return i-1;
