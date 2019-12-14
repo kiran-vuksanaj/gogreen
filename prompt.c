@@ -15,22 +15,35 @@ void print_prompt(){
   printf("[pp%d/p%d]%s$ ",getppid(),getpid(),cwd);
 }
 
-void handleansi(){
-  
+int restrictindex(char *s,int i){
+  if(i<0) return 0;
+  int len = strlen(s);
+  if(i>len) return len;
+  return i;
+}
+
+int handleansi(char *s,int i){
+  char c = getchar();
+  if(c != '[') return i;
+  c = getchar();
+  switch(c){
+  case 'D':
+    return i-1;
+  case 'C':
+    return i+1;
+  default:
+    return i;
+  }
 }
 
 int insshift(char *s,int i,char c){
-  // printf("%d\n",i);
-  if( i < 0 ) return 0;
-  if( i > strlen(s) ) return strlen(s);
   strcpy(s+i+1,s+i);
   s[i] = c;
   return ++i;
 }
 
 int delshift(char *s,int i){
-  if(i<=0) return 0;
-  if(i>strlen(s)) return strlen(s);
+  if(i==0) return 0;
   strcpy(s+i-1,s+i);
   return --i;
 }
@@ -45,7 +58,10 @@ void getcmd(char *buf){
     switch(c){
     case '\e':
       // printf("esc");
-      handleansi();
+      i = handleansi(buf,i);
+      break;
+    case '\t':
+      i = insshift(buf,i,'%');
       break;
     case 127: // BACKSPACE
       // printf("del");
@@ -55,9 +71,9 @@ void getcmd(char *buf){
       i = insshift(buf,i,c);
       break;
     }
-    printf("\e[u\e[K%s",buf);
+    i = restrictindex(buf,i);
+    printf("\e[u\e[K%s\e[u\e[%dC",buf,i);
     c = getchar();
   }
-  buf[i] = '\0';
   putchar(c); // newline
 }
