@@ -3,6 +3,8 @@
 #include<string.h>
 #include<unistd.h>
 
+#include"prompt.h"
+
 /**
  * void print_prompt() -- print prompt to precede command
  * -calls getcwd() so as to display current directory, as well as getpid() and getppid()
@@ -13,39 +15,6 @@ void print_prompt(){
   char cwd[256];
   getcwd(cwd,256);
   printf("[pp%d/p%d]%s$ ",getppid(),getpid(),cwd);
-}
-
-int restrictindex(char *s,int i){
-  if(i<0) return 0;
-  int len = strlen(s);
-  if(i>len) return len;
-  return i;
-}
-
-int handleansi(char *s,int i){
-  char c = getchar();
-  if(c != '[') return i;
-  c = getchar();
-  switch(c){
-  case 'D':
-    return i-1;
-  case 'C':
-    return i+1;
-  default:
-    return i;
-  }
-}
-
-int insshift(char *s,int i,char c){
-  strcpy(s+i+1,s+i);
-  s[i] = c;
-  return ++i;
-}
-
-int delshift(char *s,int i){
-  if(i==0) return 0;
-  strcpy(s+i-1,s+i);
-  return --i;
 }
 
 void getcmd(char *buf){
@@ -77,3 +46,37 @@ void getcmd(char *buf){
   }
   putchar(c); // newline
 }
+
+int handleansi(char *s,int i){
+  char c = getchar();
+  if(c != '[') return i;
+  c = getchar();
+  switch(c){
+  case 'D':
+    return i-1;
+  case 'C':
+    return i+1;
+  default:
+    return i;
+  }
+}
+
+int restrictindex(char *s,int i){
+  if(i<0) return 0;
+  int len = strlen(s);
+  if(i>len) return len;
+  return i;
+}
+
+int insshift(char *s,int i,char c){
+  strcpy(s+i+1,s+i);
+  s[i] = c;
+  return ++i;
+}
+
+int delshift(char *s,int i){
+  if(i==0) return 0;
+  strcpy(s+i-1,s+i);
+  return --i;
+}
+

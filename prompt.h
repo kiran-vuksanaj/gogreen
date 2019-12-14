@@ -3,10 +3,11 @@
 
 void print_prompt();
 
-void load_cmd();
-
-void reset_prompt();
-
 void getcmd(char *buffer);
 
+int handleansi(char *buf,int i);
+
+int restrictindex(char *buf, int i);
+int delshift(char *buf, int i);
+int insshift(char *buf, int i, char c);
 #endif
