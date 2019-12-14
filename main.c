@@ -25,7 +25,6 @@ int main(){
     getcmd(input);
     push_cmd(input);
     reset_termios();
-    printf("[%s]\n",input);
     if(exec_cmds(input) < 0) break;
   }
   return 0;

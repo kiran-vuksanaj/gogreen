@@ -42,7 +42,8 @@ void getcmd(char *buf){
       break;
     }
     i = restrictindex(buf,i);
-    printf("\e[u\e[K%s\e[u\e[%dC",buf,i);
+    printf("\e[u\e[K%s\e[u",buf);
+    if(i) printf("\e[%dC",i);
     c = getchar();
   }
   putchar(c); // newline
