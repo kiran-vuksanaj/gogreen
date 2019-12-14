@@ -33,11 +33,11 @@ void put_cmd(char *buf){
 }
 
 void fwd_cstack(){
-  stack = stack->next;
+  if(stack->next) stack = stack->next;
 }
 
 void bk_cstack(){
-  stack = stack->prev;
+  if(stack->prev) stack = stack->prev;
 }
 
 void free_back(struct cmd_node *node){
