@@ -11,6 +11,7 @@
 #include"prompt.h"
 #include"entry_exit.h"
 #include"cmdstack.h"
+#include"shortcut.h"
 
 int main(){
   // continue loop of print prompt, execute command, repeat forever (until signal interrupts or exited from interior)
@@ -24,6 +25,7 @@ int main(){
     getcmd(input);
     push_cmd(input);
     reset_termios();
+    insert_shortcuts(input);
     if(exec_cmds(input) < 0) break;
   }
   return 0;

@@ -9,7 +9,23 @@
 
 // cd !$
 
+void strinsert(char *dest,char *src){
+  char tmpbuf[strlen(dest)]; // -1 for ~, +1 for \0
+  strcpy(tmpbuf,dest+1); // the +1 cuts off the ~
+  strcpy(dest,src);
+  strcat(dest,tmpbuf);
+}
 
+void insert_shortcuts(char *buf){
+  char *tilda = strchr(buf,'~');
+  char *home = getenv("HOME");
+  while(tilda){
+    strinsert(tilda,home);
+    tilda = strchr(buf,'~');
+  }
+}
+
+/*
 void interpert(char ** args){
 	int x = 0;
 	char * line = malloc(100 * sizeof(char));
@@ -30,18 +46,9 @@ void interpert(char ** args){
 }
 
 int main(){
-	char array[2][20] = {"~/BRYAN",0};
-	char ** test = array;
-	int x = 0;
-	while(test[x]) { 
-		printf ("\tEntry: %d: %d\n", x, test[x]);
-		x++; 
-	}
-	interpert(&test);
-	x =0;
-	while(test[x]){ 
-		printf ("\tEntry: %d: %d\n", x, test[x]); 
-		x++;
-	}
-	return 0;
+  char buf[256];
+  fgets(buf,256,stdin);
+  insert_shortcuts(buf);
+  printf("[%s]\n",buf);
 }
+*/

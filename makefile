@@ -2,9 +2,9 @@ ifeq ($(DEBUG),true)
 	CFLAGS = -g
 endif
 
-all: main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o cmdstack.o
-	gcc $(CFLAGS) -o shash main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o cmdstack.o
-main.o: main.c parseargs.h execute.h prompt.h entry_exit.h cmdstack.h
+all: main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o cmdstack.o shortcut.o
+	gcc $(CFLAGS) -o shash main.o parseargs.o execute.o prompt.o redirect.o stry_util.o entry_exit.o cmdstack.o shortcut.o
+main.o: main.c parseargs.h execute.h prompt.h entry_exit.h cmdstack.h shortcut.h
 	gcc $(CFLAGS) -c main.c
 parseargs.o: parseargs.c parseargs.h
 	gcc $(CFLAGS) -c parseargs.c
@@ -20,6 +20,8 @@ entry_exit.o: entry_exit.c entry_exit.h
 	gcc $(CFLAGS) -c entry_exit.c
 cmdstack.o: cmdstack.c cmdstack.h
 	gcc $(CFLAGS) -c cmdstack.c
+shortcut.o: shortcut.c shortcut.h
+	gcc $(CFLAGS) -c shortcut.c
 
 run:
 	./shash
