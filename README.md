@@ -26,7 +26,7 @@ by Kiran Vuksanaj and Bryan Monge-Serrano
 #### Files & Function Headers
 (we mightve split up our files a little tooo much)\
 `main.c` -- *home of the prompt loop*
-- dependencies: execute, prompt, entry_exit, cmdstack
+- dependencies: execute, prompt, entry_exit, cmdstack, shortcut
 - `int main();`
   - runs a forever loop switching between get prompt and execute command
 
@@ -135,7 +135,12 @@ Methods for editing, accessing, and clearing
   - scans through the elements of args to find symbols representing file redirects, and configures the standard file streams to match the demands of these redirects
   - on exit, `bk_pointer` will be populated with file descriptors representing backups of the file streams, or -1 if they were not modified
   - returns 0 on success, -1 on failure
-`shortcut.c`
+  
+`shortcut.c` -- *replacing tildas with home directories*
+- `void strinsert(char *dest, char *src)`
+  - copies `src` into `dest` and shifts contents of `dest` to the right len(src) characters
+- `void insert_shortcuts(char *buf)`
+  - replaces all instances of `~` in `buf` with the user's home directory, as found by `getenv("HOME")`
 
 `stry_util.c` -- *some utility functions for operations on NULL-terminated string arrays*
 - `void remove_blanks(char **args)`
